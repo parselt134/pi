@@ -1,8 +1,8 @@
 import sys
-import platform
-import psutil
-import time
-import speedtest
+import platform  # о системе
+import psutil  # о компонентах
+import time  # для задержки на одну секунду при постройке графика
+import speedtest  # для замера скорости интернета
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
@@ -17,27 +17,34 @@ class PI(QMainWindow):
         self.tabWidget.setTabText(2, "Диски")
         self.tabWidget.setTabText(3, "Интернет")
         self.tabWidget.setTabText(4, "RAM")
-        # Вызываем метод set_general, который установит информацию во вкладку "Общие сведения"
-        self.set_general()
+        # Вызываем метод _set_general, который установит информацию во вкладку "Общие сведения"
+        """ Подчёркивание вначале названия метода нужно для обозначения метода защищённым
+         т.е. этот метод будет допускаться к обращению только внутри класса и в его
+         дочерних классах"""
+        self._set_general()
 
-        self.set_cpu()
-        self.pushButton_cpu.clicked.connect(self.plot_cpu)
+        self._set_cpu()
+        self.pushButton_cpu.clicked.connect(self._plot_cpu)
         self.graphic_cpu.showGrid(x=True, y=True, alpha=0.5)
 
-        # TODO: проверить на Linux
-        discs = [i.device for i in psutil.disk_partitions()]
+        if platform.system() == "Linux":
+            discs = ["/"]
+        else:
+            discs = [i.device for i in psutil.disk_partitions()]
         self.discs_cb.addItems(discs)
-        self.pushButton_discs.clicked.connect(self.set_discs)
+        self.pushButton_discs.clicked.connect(self._set_discs)
 
-        self.pushButton_ram.clicked.connect(self.plot_ram)
+        self.pushButton_ram.clicked.connect(self._plot_ram)
         self.graphic_ram.showGrid(x=True, y=True, alpha=0.5)
 
-        self.pushButton_inet.clicked.connect(self.set_inet)
+        self.pushButton_inet.clicked.connect(self._set_inet)
 
-    def set_general(self):
+    def _set_general(self):
         name_os = platform.uname().system
         name_pc = platform.uname().node
         release = platform.uname().release
+        """ platform.architecture() вернёт кортеж из двух элементов,
+         где первый элемент -- архитектура битов (разрядность)"""
         architecture = platform.architecture()[0]
         self.os_label.setText("Операционная система: " + name_os)
         self.os_version_label.setText("Версия ОС: " + release)
@@ -53,12 +60,12 @@ class PI(QMainWindow):
         else:
             self.edition_label.setText(self.edition_label.text() + "Отсутствует ")
 
-    def set_cpu(self):
+    def _set_cpu(self):
         self.name_cpu_label.setText("Реальное имя процессора: " + platform.processor())
         self.logic_proc_label.setText("Количество логических процессоров: " + str(psutil.cpu_count()))
         self.cores_label.setText("Количество ядер: " + str(psutil.cpu_count(logical=False)))
 
-    def plot_cpu(self):
+    def _plot_cpu(self):
         self.graphic_cpu.clear()
         range_seconds = self.spinBox_cpu.value()
         self.open_second_form(range_seconds)
@@ -66,31 +73,32 @@ class PI(QMainWindow):
                               [psutil.cpu_percent(interval=1) for _ in range(range_seconds + 1)],
                               pen="g")
 
-    def set_discs(self):
+    def _set_discs(self):
         disc_usage = psutil.disk_usage(self.discs_cb.currentText())
-        capacity = str(int(disc_usage[0]/1024/1024/1024))
-        used = str(int(disc_usage[1]/1024/1024/1024))
-        free = str(int(disc_usage[2]/1024/1024/1024))
+        capacity = str(int(disc_usage.total/1024/1024/1024))
+        used = str(int(disc_usage.used/1024/1024/1024))
+        free = str(int(disc_usage.free/1024/1024/1024))
         self.capacity_label.setText("Ёмкость: " + capacity + " ГБ")
         self.used_label.setText("Используется (в ГБ): " + used)
-        self.used_pb.setValue(round(disc_usage[3]))
+        # disc_usage.percent вернёт процент использования
+        self.used_pb.setValue(round(disc_usage.percent))
         self.free_label.setText("Свободно (в ГБ): " + free)
-        self.free_pb.setValue(round(100 - disc_usage[3]))
+        self.free_pb.setValue(round(100 - disc_usage.percent))
 
-    def set_inet(self):
+    def _set_inet(self):
         self.open_second_form(30)
         st = speedtest.Speedtest()
         # Скорость загрузки
-        download = str(round(st.download()/1024/1024, 2))
-        self.download_label.setText("Скорость загрузки: " + download + " Мбит/c")
+        download_speed = str(round(st.download()/1024/1024, 2))
+        self.download_label.setText("Скорость загрузки: " + download_speed + " Мбит/c")
         # Скорость передачи
-        upload = str(round(st.upload()/1024/1024, 2))
-        self.upload_label.setText("Скорость передачи: " + upload + " Мбит/с")
+        upload_speed = str(round(st.upload()/1024/1024, 2))
+        self.upload_label.setText("Скорость передачи: " + upload_speed + " Мбит/с")
         st.get_servers([])
         ping = str(st.results.ping)
         self.ping_label.setText("Пинг: " + ping + " мс")
 
-    def plot_ram(self):
+    def _plot_ram(self):
         self.graphic_ram.clear()
         range_seconds = self.spinBox_ram.value()
         self.open_second_form(range_seconds)
