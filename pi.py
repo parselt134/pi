@@ -27,8 +27,10 @@ class PI(QMainWindow):
         self.pushButton_cpu.clicked.connect(self._plot_cpu)
         self.graphic_cpu.showGrid(x=True, y=True, alpha=0.5)
 
+        # Если ОС на компьютере "Linux", то за диск принимаем только корень
         if platform.system() == "Linux":
             discs = ["/"]
+        # Иначе, устанавливаем буквы логических дисков (только на Windows)
         else:
             discs = [i.device for i in psutil.disk_partitions()]
         self.discs_cb.addItems(discs)
