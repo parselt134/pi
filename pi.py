@@ -86,16 +86,26 @@ class PI(QMainWindow):
                               pen="g")
 
     def _set_discs(self):
-        disc_usage = psutil.disk_usage(self.discs_cb.currentText())
-        capacity = str(int(disc_usage.total/1024/1024/1024))
-        used = str(int(disc_usage.used/1024/1024/1024))
-        free = str(int(disc_usage.free/1024/1024/1024))
-        self.capacity_label.setText("Ёмкость: " + capacity + " ГБ")
-        self.used_label.setText("Используется (в ГБ): " + used)
-        # disc_usage.percent вернёт процент использования
-        self.used_pb.setValue(round(disc_usage.percent))
-        self.free_label.setText("Свободно (в ГБ): " + free)
-        self.free_pb.setValue(round(100 - disc_usage.percent))
+        try:
+            disc_usage = psutil.disk_usage(self.discs_cb.currentText())
+            capacity = str(int(disc_usage.total/1024/1024/1024))
+            used = str(int(disc_usage.used/1024/1024/1024))
+            free = str(int(disc_usage.free/1024/1024/1024))
+            self.capacity_label.setText("Ёмкость: " + capacity + " ГБ")
+            self.used_label.setText("Используется (в ГБ): " + used)
+            # disc_usage.percent вернёт процент использования
+            self.used_pb.setValue(round(disc_usage.percent))
+            self.free_label.setText("Свободно (в ГБ): " + free)
+            self.free_pb.setValue(round(100 - disc_usage.percent))
+        # OSError -- исключение, связанное с системой
+        except OSError:
+            self.capacity_label.setText("Невозможно определить свойства диска")
+            self.used_label.setText("")
+            self.used_pb.setValue(round(0))
+            self.free_label.setText("")
+            self.free_pb.setValue(round(0))
+
+
 
     def _set_inet(self):
         self.open_second_form(30)
