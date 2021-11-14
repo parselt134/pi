@@ -18,19 +18,16 @@ class PI(QMainWindow):
         self.tabWidget.setTabText(3, "Интернет")
         self.tabWidget.setTabText(4, "RAM")
         # Вызываем метод _set_general, который установит информацию во вкладку "Общие сведения"
-        """ Подчёркивание вначале названия метода нужно для обозначения метода защищённым
-         т.е. этот метод будет допускаться к обращению только внутри класса и в его
-         дочерних классах"""
         self._set_general()
-
+        # Подчёркивание вначале названия метода нужно для обозначения метода защищённым
+        # т.е. этот метод будет допускаться к обращению только внутри класса и в его
+        # дочерних классах
         self._set_cpu()
         self.pushButton_cpu.clicked.connect(self._plot_cpu)
         self.graphic_cpu.showGrid(x=True, y=True, alpha=0.5)
 
-        # Если ОС на компьютере "Linux", то за диск принимаем только корень
         if platform.system() == "Linux":
             discs = ["/"]
-        # Иначе, устанавливаем буквы логических дисков (только на Windows)
         else:
             discs = [i.device for i in psutil.disk_partitions()]
         self.discs_cb.addItems(discs)
@@ -45,8 +42,8 @@ class PI(QMainWindow):
         name_os = platform.uname().system
         name_pc = platform.uname().node
         release = platform.uname().release
-        """ platform.architecture() вернёт кортеж из двух элементов,
-         где первый элемент -- архитектура битов (разрядность)"""
+        # platform.architecture() вернёт кортеж из двух элементов,
+        # где первый элемент -- архитектура битов (разрядность)
         architecture = platform.architecture()[0]
         self.os_label.setText("Операционная система: " + name_os)
         self.os_version_label.setText("Версия ОС: " + release)
@@ -56,11 +53,24 @@ class PI(QMainWindow):
             edition = platform.win32_edition()
             self.edition_label.setText("Редакция или дистрибутив: " + edition)
         elif name_os == "Linux":
-            edition = open("/etc/lsb-release", mode="rt", encoding="utf-8")\
-                .readline().split("=")[-1].replace('"', "")
+            # К сожалению, метод platform.linux_distribution() устарел и
+            # был удалён в Python 3.8 (он определял дистрибутив Linux)
+
+            # Для того, чтобы определить дистрибутив,
+            # будет в папке etc, содержащая файлы настроек,
+            # читаться файл lsb-release, имеющий 4 строки,
+            # где 1-ая -- название дистрибутива
+            # (строка вида DISTRIB_ID="<название дистрибутива>").
+
+            # Открываем файл lsb-release
+            # Берём 1-ую строку, используя метод readline()
+            # Делим её по символу "=" на две части
+            # Берём последнюю и удаляем парные кавычки
+            with open("etc/lsb-release", mode="rt", encoding="utf-8") as f:
+                edition = f.readline().split("=")[-1].replace('"', "")
             self.edition_label.setText("Редакция или дистрибутив: " + edition)
         else:
-            self.edition_label.setText(self.edition_label.text() + "Отсутствует ")
+            self.edition_label.setText("Редакция или дистрибутив: " + "Отсутствует")
 
     def _set_cpu(self):
         self.name_cpu_label.setText("Реальное имя процессора: " + platform.processor())
