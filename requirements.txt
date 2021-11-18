@@ -1,5 +1,5 @@
 python==3.9.8
-PyQt==5.15.6
+PyQt5==5.15.6
 pyqtgraph==0.12.3
 psutil==5.8.0
 speedtest-cli==2.1.3
