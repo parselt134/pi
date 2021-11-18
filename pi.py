@@ -66,7 +66,7 @@ class PI(QMainWindow):
             # Берём 1-ую строку, используя метод readline()
             # Делим её по символу "=" на две части
             # Берём последнюю и удаляем парные кавычки
-            with open("/etc/lsb-release", mode="rt", encoding="utf-8") as f:
+            with open("etc/lsb-release", mode="rt", encoding="utf-8") as f:
                 edition = f.readline().split("=")[-1].replace('"', "")
             self.edition_label.setText("Редакция или дистрибутив: " + edition)
         else:
@@ -105,20 +105,24 @@ class PI(QMainWindow):
             self.free_label.setText("")
             self.free_pb.setValue(round(0))
 
-
-
     def _set_inet(self):
-        self.open_second_form(30)
-        st = speedtest.Speedtest()
-        # Скорость загрузки
-        download_speed = str(round(st.download()/1024/1024, 2))
-        self.download_label.setText("Скорость загрузки: " + download_speed + " Мбит/c")
-        # Скорость передачи
-        upload_speed = str(round(st.upload()/1024/1024, 2))
-        self.upload_label.setText("Скорость передачи: " + upload_speed + " Мбит/с")
-        st.get_servers([])
-        ping = str(st.results.ping)
-        self.ping_label.setText("Пинг: " + ping + " мс")
+        try:
+            st = speedtest.Speedtest()
+            self.open_second_form(30)
+            # Скорость загрузки
+            download_speed = str(round(st.download()/1024/1024, 2))
+            self.download_label.setText("Скорость загрузки: " + download_speed + " Мбит/c")
+            # Скорость передачи
+            upload_speed = str(round(st.upload()/1024/1024, 2))
+            self.upload_label.setText("Скорость передачи: " + upload_speed + " Мбит/с")
+            st.get_servers([])
+            ping = str(st.results.ping)
+            self.ping_label.setText("Пинг: " + ping + " мс")
+        # SpeedtestException -- общая ошибка библиотеки speedtest
+        except speedtest.SpeedtestException:
+            self.download_label.setText("Проблемы с подключением")
+            self.upload_label.setText("")
+            self.ping_label.setText("")
 
     def _plot_ram(self):
         self.graphic_ram.clear()
