@@ -4,6 +4,8 @@ import psutil  # о компонентах
 import time  # для задержки на одну секунду при постройке графика
 import speedtest  # для замера скорости интернета
 from PyQt5 import uic
+from PyQt5.QtCore import Qt  # понадобится для пасхального яйца
+from PyQt5.QtGui import QPixmap  # понадобится для пасхального яйца
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
 
@@ -138,6 +140,27 @@ class PI(QMainWindow):
     def open_second_form(self, seconds):
         self.second_form = SecondForm(self, seconds)
         self.second_form.show()
+
+    def keyPressEvent(self, event):
+        if int(event.modifiers()) == Qt.ShiftModifier:
+            if event.key() == Qt.Key_S:
+                self.easter_egg = EasterEgg()
+                self.easter_egg.show()
+
+
+class EasterEgg(QWidget):
+    def __init__(self):
+        super(EasterEgg, self).__init__()
+        self.initUi()
+
+    def initUi(self):
+        self.setFixedSize(370, 370)
+        self.setWindowTitle("Как ты здесь оказался?")
+
+        self.pixmax = QPixmap("./pic/easter_eggs.png")
+        self.image = QLabel(self)
+        self.image.move(0, 0)
+        self.image.setPixmap(self.pixmax)
 
 
 class SecondForm(QWidget):
