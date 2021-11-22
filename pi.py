@@ -3,16 +3,16 @@ import platform  # о системе
 import psutil  # о компонентах
 import time  # для задержки на одну секунду при постройке графика
 import speedtest  # для замера скорости интернета
-from PyQt5 import uic
+from pi_design import Ui_MainWindow
 from PyQt5.QtCore import Qt  # понадобится для пасхального яйца
 from PyQt5.QtGui import QPixmap  # понадобится для пасхального яйца
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
 
-class PI(QMainWindow):
+class PI(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(PI, self).__init__()
-        uic.loadUi("pi-design.ui", self)
+        self.setupUi(self)
         # Устанавливаем названия вкладок
         self.tabWidget.setTabText(0, "Общие сведения")
         self.tabWidget.setTabText(1, "CPU")
