@@ -120,7 +120,7 @@ class PI(QMainWindow, Ui_MainWindow):
             st.get_servers([])
             ping = str(st.results.ping)
             self.ping_label.setText("Пинг: " + ping + " мс")
-        # SpeedtestException -- общая ошибка библиотеки speedtest
+        # SpeedtestException -- общее исключение библиотеки speedtest
         except speedtest.SpeedtestException:
             self.download_label.setText("Проблемы с подключением")
             self.upload_label.setText("")
@@ -175,8 +175,13 @@ class SecondForm(QWidget):
         self.lbl.adjustSize()
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = PI()
     widget.show()
+    sys.excepthook = except_hook
     sys.exit(app.exec())
