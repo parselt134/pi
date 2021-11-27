@@ -68,7 +68,7 @@ class PI(QMainWindow, Ui_MainWindow):
             # Берём 1-ую строку, используя метод readline()
             # Делим её по символу "=" на две части
             # Берём последнюю и удаляем парные кавычки
-            with open("./etc/lsb-release", mode="rt", encoding="utf-8") as f:
+            with open("/etc/lsb-release", mode="rt", encoding="utf-8") as f:
                 edition = f.readline().split("=")[-1].replace('"', "")
             self.edition_label.setText("Редакция или дистрибутив: " + edition)
         else:
